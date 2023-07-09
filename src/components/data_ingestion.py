@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from src.exception import CustomException
 from src.logger import logging
 from src.components.data_transformation import DataTransformation, DataTransformationConfig
+from src.components.model_trainer import ModelTrainerConfig, ModelTrainer
 
 @dataclass
 class DataIngestionConfig:
@@ -20,30 +21,30 @@ class DataIngestion:
         self.ingestion_config = DataIngestionConfig()
 
     def initiate_data_ingestion(self):  #Read the data set from local or database
-        logging.info("Entered the data ingestion method or component")
+        logging.info("Data Ingestion: Entered the data ingestion method or component")
         try:
             df=pd.read_csv('notebook\data\stud.csv')
-            logging.info("Dataset read as data frame")
+            logging.info("Data Ingestion: Dataset read as data frame")
             
             #Making the file in artifacts
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path),exist_ok=True)
             
             #Saving Raw data to csv
             df.to_csv(self.ingestion_config.raw_data_path, index=False, header=True)
-            logging.info("Raw Data Saved")
+            logging.info("Data Ingestion: Raw Data Saved")
             
             #Train Test Split
-            logging.info("Train Test Split Initiated")
+            logging.info("Data Ingestion: Train Test Split Initiated")
             train_set,test_set = train_test_split(df, test_size=0.2, random_state=42)
 
             #Saving Train data to csv
             train_set.to_csv(self.ingestion_config.train_data_path, index=False, header=True)
-            logging.info("Train Data Saved")
+            logging.info("Data Ingestion: Train Data Saved")
 
             #Saving Test data to csv
             test_set.to_csv(self.ingestion_config.test_data_path, index=False, header=True)
-            logging.info("Test Data Saved")
-            logging.info("Data Ingestion Completed")
+            logging.info("Data Ingestion: Test Data Saved")
+            logging.info("Data Ingestion: Data Ingestion Completed")
 
             return(
                 self.ingestion_config.train_data_path,
@@ -58,6 +59,10 @@ if __name__=="__main__":
     train_data, test_data = obj.initiate_data_ingestion()
 
     data_transformation = DataTransformation()
-    data_transformation.initiate_data_transformation(train_data, test_data)
+    train_arr,test_arr,_= data_transformation.initiate_data_transformation(train_data, test_data)
+    model_trainer = ModelTrainer()
+    print(model_trainer.initiate_model_trainer(train_arr, test_arr))
+
+
 
 
